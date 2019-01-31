@@ -9,9 +9,9 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public class ScheduleTask {
+public class LoopingKickPlayer {
 
-    public static Task.Builder LoopingKickPlayer = Task
+    public static Task.Builder TaskBuilder = Task
     .builder()
     .interval(5, TimeUnit.SECONDS)
     .execute(() -> {

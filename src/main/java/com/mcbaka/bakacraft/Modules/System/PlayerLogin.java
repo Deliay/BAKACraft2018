@@ -15,7 +15,7 @@ import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.scheduler.Task;
 import java.util.*;
 
-import com.mcbaka.bakacraft.Modules.System.PlayerLoginHelper.ScheduleTask;
+import com.mcbaka.bakacraft.Modules.System.PlayerLoginHelper.LoopingKickPlayer;
 
 /**
  * Player login modules
@@ -27,6 +27,9 @@ import com.mcbaka.bakacraft.Modules.System.PlayerLoginHelper.ScheduleTask;
  * */
 public class PlayerLogin extends AbstractModule implements IEventHandler {
 
+    /**
+     * 用于踢出未登录玩家的定时任务
+     */
     private Task scheduleKickPlayer = null;
     private CommandMapping commandLogin = null;
     public static boolean LoginServiceEnable = false;
@@ -37,7 +40,7 @@ public class PlayerLogin extends AbstractModule implements IEventHandler {
         LoginManager.CreateInstance();
         AbstractModule.RegisterListener(new EventHandlers());
         commandLogin = Sponge.getCommandManager().register(Main.GetInstance(), Commands.LoginCommand, LoginText.COMMAND_LOGIN.toPlain()).orElse(null);
-        scheduleKickPlayer = ScheduleTask.LoopingKickPlayer.submit(Main.GetInstance());
+        scheduleKickPlayer = RegisterTaskBuilder(LoopingKickPlayer.TaskBuilder);
 
         List<Integer> result = ModuleOf(MySQL.class)
         .Query(SQLs.GetUserCount)

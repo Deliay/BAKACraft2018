@@ -1,11 +1,14 @@
 package com.mcbaka.bakacraft.Modules.Survival;
 
 import com.mcbaka.bakacraft.Modules.AbstractModule;
+import com.mcbaka.bakacraft.Modules.Survival.DivineWrathHelper.LoopRestrictPlayer;
+import com.mcbaka.bakacraft.Modules.Survival.DivineWrathHelper.PlayerDeadManager;
 import com.mcbaka.bakacraft.Util.IEventHandler;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.scheduler.Task;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -17,26 +20,26 @@ import java.util.HashMap;
  *    如果饱食度一直没有恢复，血量最多只能恢复到一半。
  *    多恢复的血量以伤害的形式减扣。
  * 3. 虚弱模式下，造成伤害减半，附加缓慢I
+ * 4. 本状态5分钟自动恢复
+ * 5. 200节操可立即解除本状态
  */
 public class DivineWrath extends AbstractModule implements IEventHandler {
 
-    private HashMap<Player, LocalDateTime> restrictRecord = new HashMap<>();
-
+    private Task restrictTask = null;
     @Override
     public void Load() {
-
+        restrictTask = RegisterTaskBuilder(LoopRestrictPlayer.TaskBuilder);
     }
 
     @Override
     public void Unload() {
-
+        restrictTask.cancel();
     }
 
     @Listener
     public void onPlayerDead(DestructEntityEvent.Death event, @First Player player) {
-
-        restrictRecord.put(player, LocalDateTime.now());
+        if (event.getTargetEntity() instanceof Player) {
+            PlayerDeadManager.SetPlayerRestrict(player);
+        }
     }
-
-
 }

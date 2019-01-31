@@ -9,6 +9,7 @@ import com.mcbaka.bakacraft.Util.Holder;
 import com.mcbaka.bakacraft.Util.IConfigurationHolder;
 import com.mcbaka.bakacraft.Util.IEventHandler;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.scheduler.Task;
 
 public abstract class AbstractModule {
     @Inject
@@ -24,5 +25,8 @@ public abstract class AbstractModule {
     }
     public <T extends AbstractModule> T ModuleOf(Class<T> clazz) {
         return ModulesLoader.GetModule(clazz).target();
+    }
+    public static Task RegisterTaskBuilder(Task.Builder builder) {
+        return builder.submit(Main.GetInstance());
     }
 }

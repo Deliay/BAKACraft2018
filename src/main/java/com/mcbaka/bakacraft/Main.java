@@ -14,7 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 
-@Plugin(id="bakacraft2018", name = "BAKACraft 2018", version = "1.0", description = "BAKACraft 2018 Plug-ins")
+@Plugin(id="bakacraft2018", name = "BAKACraft 2018", version = "0.0", description = "BAKACraft 2018 Plug-ins")
 public class Main {
     @Inject
     @ConfigDir(sharedRoot = false)
@@ -32,7 +32,7 @@ public class Main {
     @Listener
     public void onGameConstructor(GameConstructionEvent ev) {
         try {
-            offsite = new URL("https://mcbaka.com");
+            offsite = new URL("http://mcbaka.com");
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

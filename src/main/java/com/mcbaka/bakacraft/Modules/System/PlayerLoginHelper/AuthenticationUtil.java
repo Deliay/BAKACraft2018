@@ -28,13 +28,6 @@ public class AuthenticationUtil {
         return false;
     }
 
-    public static boolean IsPlayerRegistered(String playerName) {
-        return ModulesLoader.GetModule(MySQL.class)
-        .target()
-        .Query(SQLs.CountPlayerByName(playerName))
-        .QueryResult(rs -> rs.getInt("id")).size() == 1;
-    }
-
     public static boolean UpdateUserPasswordByUserName(String userName, String password) {
         return ModulesLoader.GetModule(MySQL.class)
         .target()
@@ -50,6 +43,13 @@ public class AuthenticationUtil {
             .QueryResult(rs -> rs.getString("password"))
             .get(0)
         );
+    }
+
+    public static boolean IsPlayerRegistered(String playerName) {
+        return ModulesLoader.GetModule(MySQL.class)
+        .target()
+        .Query(SQLs.CountPlayerByName(playerName))
+        .QueryResult(rs -> rs.getInt("id")).size() == 1;
     }
 
     public static String Hash(String toHash) {
