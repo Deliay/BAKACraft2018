@@ -9,8 +9,10 @@ import com.mcbaka.bakacraft.Util.Whirlpool;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * This class is design for Player password authentication.
+ */
 public class AuthenticationUtil {
-
 
     public static boolean TryLogin(String userName, String password) {
         Optional<String> realPasswordOpt = FetchPasswordByUserName(userName);

@@ -18,6 +18,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class GameServerHelper {
+    /**
+     * Search player name from current online player list
+     * @param name player name
+     * @return {@link Optional<Player>}
+     */
     public static Optional<Player> FindPlayerOnlineByName(String name) {
         Collection<Player> players = Sponge.getServer().getOnlinePlayers();
         String lowerCaseName = name.toLowerCase();
@@ -29,19 +34,40 @@ public class GameServerHelper {
         return Optional.empty();
     }
 
-    public static boolean SubscribeUserEconomy(Player player, DoubleAction<Currency, UniqueAccount> consumer) {
-        return SubscribeEconomy(economyService -> {
+    /**
+     * Subscribe Sponge Account and Currency
+     * @param player player instance
+     * @param consumer Action
+     */
+    public static void SubscribeUserEconomy(Player player, DoubleAction<Currency, UniqueAccount> consumer) {
+        SubscribeEconomy(economyService -> {
             Optional<UniqueAccount> uOpt = economyService.getOrCreateAccount(player.getUniqueId());
             uOpt.ifPresent(acc -> consumer.apply(economyService.getDefaultCurrency(), acc));
-            return true;
         });
     }
 
-    public static boolean SubscribeEconomy(Function<EconomyService, Boolean> function) {
+    public static <T> T SubscribeUserEconomy(Player player, DoubleFunction<Currency, UniqueAccount, T> consumer, T defaultValue) {
+        return SubscribeEconomy(economyService -> {
+            Optional<UniqueAccount> uOpt = economyService.getOrCreateAccount(player.getUniqueId());
+            if (uOpt.isPresent()) {
+                return consumer.apply(economyService.getDefaultCurrency(), uOpt.get());
+            }
+            return defaultValue;
+        }, defaultValue);
+    }
+
+    public static <T> T SubscribeEconomy(Function<EconomyService, T> function, T defaultValue) {
         Optional<EconomyService> serviceOpt = Sponge.getServiceManager().provide(EconomyService.class);
         if (!serviceOpt.isPresent()) {
-            return false;
+            return defaultValue;
         }
         return function.apply(serviceOpt.get());
+    }
+    public static void SubscribeEconomy(Consumer<EconomyService> action) {
+        Optional<EconomyService> serviceOpt = Sponge.getServiceManager().provide(EconomyService.class);
+        if (!serviceOpt.isPresent()) {
+            return;
+        }
+        action.accept(serviceOpt.get());
     }
 }

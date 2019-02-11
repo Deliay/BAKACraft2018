@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
+import java.util.HashMap;
 
 public class Configuration {
     private Path baseDirectory;
@@ -22,6 +23,10 @@ public class Configuration {
         ourInstance = this;
     }
 
+    private HashMap<Class, HoconConfigurationLoader> configLoader = new HashMap<>();
+    public HoconConfigurationLoader getConfigurationLoader(Class clazz) {
+        return configLoader.get(clazz);
+    }
     public <T extends IConfigurationHolder> HoconConfigurationLoader generateConfiguration(T instance) {
         String classSimpleName = instance.getClass().getSimpleName();
         Path confPath = baseDirectory.resolve(classSimpleName + ".conf");
@@ -50,6 +55,7 @@ public class Configuration {
                 instance.initializeConfig(defaultRoot);
                 loader.save(defaultRoot);
             }
+            configLoader.put(instance.getClass(), loader);
         } catch (IOException e) {
             Logger.getInstance().getLogger().error("Can't create instance of " + loader.toString());
         }
@@ -66,6 +72,8 @@ public class Configuration {
                     field.set(instance, root(loader));
                 } catch (IllegalAccessException e) {
                     Logger.getInstance().getLogger().error("Can't inject to @InjectConfigRoot annotation field");
+                } catch (IOException e) {
+                    Logger.getInstance().getLogger().error("Can't load root element form configuration file");
                 }
             }
         }
@@ -79,12 +87,7 @@ public class Configuration {
     public static Configuration GetInstance() {
         return ourInstance;
     }
-    public static ConfigurationNode root(ConfigurationLoader<CommentedConfigurationNode> holder) {
-        try {
-            return holder.load(ConfigurationOptions.defaults());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public static ConfigurationNode root(ConfigurationLoader<CommentedConfigurationNode> holder) throws IOException {
+        return holder.load(ConfigurationOptions.defaults());
     }
 }

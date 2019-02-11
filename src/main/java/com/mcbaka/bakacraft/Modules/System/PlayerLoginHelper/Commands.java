@@ -13,33 +13,33 @@ import java.util.Optional;
 
 public class Commands {
     public static CommandSpec LoginCommand = CommandSpec.builder()
-    .description(Text.of("LoginText to server"))
+    .description(LoginText.COMMAND_DESCRIPTION)
     .arguments(GenericArguments.string(LoginText.COMMAND_ARG_PASSWORD))
-    .executor((src, args) -> {
-        if (src instanceof Player) {
-            Player player = (Player) src;
-            String playerName = player.getName().toLowerCase();
-            if (LoginManager.PlayerIsPendingLogin(playerName)) {
-                Optional<String> password = args.getOne(LoginText.COMMAND_ARG_PASSWORD);
-                if(password.isPresent()) {
-                    if (AuthenticationUtil.TryLogin(playerName, password.get())) {
-                        src.sendMessage(LoginText.LOGIN_SUCCESS);
-                        //登录成功，则将标识删掉
-                        LoginManager.RemovePlayerFromPendingLogin(playerName);
-                        player.offer(Keys.GAME_MODE, GameModes.SURVIVAL);
-                        LoginManager.RestorePlayerPosition(player);
-                    } else {
-                        src.sendMessage(LoginText.LOGIN_AUTH_FAIL);
-                    }
-                } else {
-                    src.sendMessage(LoginText.REQUIRE_PASSWORD);
-                }
-            } else {
-                src.sendMessage(LoginText.ALREADY_LOGIN);
-            }
-        } else {
-            src.sendMessage(Text.of("Must execute in client side"));
+    .executor((sender, args) -> {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(LoginText.COMMAND_MUST_RUN_BY_PLAYER);
+            return CommandResult.empty();
         }
+        Player player = (Player) sender;
+        String playerName = player.getName().toLowerCase();
+        if (!LoginManager.PlayerIsPendingLogin(playerName)) {
+            sender.sendMessage(LoginText.ALREADY_LOGIN);
+            return CommandResult.empty();
+        }
+        Optional<String> password = args.getOne(LoginText.COMMAND_ARG_PASSWORD);
+        if(!password.isPresent()) {
+            sender.sendMessage(LoginText.REQUIRE_PASSWORD);
+            return CommandResult.empty();
+        }
+        if (!AuthenticationUtil.TryLogin(playerName, password.get())) {
+            sender.sendMessage(LoginText.LOGIN_AUTH_FAIL);
+            return CommandResult.empty();
+        }
+        sender.sendMessage(LoginText.LOGIN_SUCCESS);
+        //登录成功，则将标识删掉
+        LoginManager.RemovePlayerFromPendingLogin(playerName);
+        player.offer(Keys.GAME_MODE, GameModes.SURVIVAL);
+        LoginManager.RestorePlayerPosition(player);
         return CommandResult.success();
     }).build();
 }

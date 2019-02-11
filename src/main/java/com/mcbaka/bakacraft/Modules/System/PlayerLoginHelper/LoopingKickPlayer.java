@@ -10,7 +10,10 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class LoopingKickPlayer {
-
+    /**
+     * Checking player who not login pre 5 seconds.
+     * Up to 30s to login, kick if overtime.
+     */
     public static Task.Builder TaskBuilder = Task
     .builder()
     .interval(5, TimeUnit.SECONDS)
